@@ -7,5 +7,5 @@ case class MollieConfig(
     testApiKey: String,
     testMode: Boolean
 ) {
-  require(!testMode || (testMode && apiKey.isDefined), "In live mode api key needs to be defined!")
+  require(testMode || (!testMode && apiKey.isDefined), "In live mode api key needs to be defined!")
 }
