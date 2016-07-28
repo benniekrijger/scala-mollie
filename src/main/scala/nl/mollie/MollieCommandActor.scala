@@ -40,12 +40,12 @@ class MollieCommandActor(
       } yield response match {
         case resp @ HttpResponse(StatusCodes.Created, headers, entity, _) =>
           Unmarshal(entity).to[PaymentResponse]
-            .map(cmdSender ! _)
             .recover {
               case e: Throwable =>
                 log.error(s"Response: $resp, failed to create payment: {}", e)
                 MollieFailure(s"Failed to create payment: $cmd")
             }
+            .map(cmdSender ! _)
         case resp @ HttpResponse(code, _, _, _) =>
           log.error(s"Response: $resp, failed to create payment: $cmd")
           cmdSender ! MollieFailure(s"Failed to create payment: $cmd")

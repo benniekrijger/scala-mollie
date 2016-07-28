@@ -2,7 +2,7 @@ package nl.mollie.commands
 
 import nl.mollie.models.PaymentLocale
 
-trait CreatePayment {
+sealed trait CreatePayment {
   val amount: Double
   val description: String
   val redirectUrl: String
