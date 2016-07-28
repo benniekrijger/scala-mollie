@@ -2,7 +2,6 @@ package nl.mollie
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import akka.routing.RoundRobinPool
-import akka.stream.ActorMaterializer
 import nl.mollie.commands.CreatePayment
 import nl.mollie.config.MollieConfig
 import nl.mollie.connection.{HttpServer, MollieConnection}
@@ -54,8 +53,9 @@ object MollieClientActor {
 
   final val name: String = "mollie"
 
-  def props(): Props = Props(
-    classOf[MollieClientActor]
+  def props(config: MollieConfig): Props = Props(
+    classOf[MollieClientActor],
+    config
   )
 
 }

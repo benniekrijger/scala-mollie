@@ -18,5 +18,32 @@ Sample usage
 ------------
 
 ```scala
-   TODO
+
+     val mollieConfig = MollieConfig(
+       apiHost = "api.mollie.nl",
+       apiBasePath = "v1",
+       apiKey = Some("liveApiKey"),
+       testApiKey = "testApiKey",
+       testMode = true
+     )
+   
+     val mollieClient = system.actorOf(
+       MollieClientActor.props(mollieConfig),
+       MollieClientActor.name
+     )
+   
+     (mollieClient ? GetPayment("some-payment-id")) {
+       case resp: PaymentResponse =>
+       case _ => // failure
+     }
+   
+     (mollieClient ? ListPaymentIssuers()) {
+       case resp: PaymentIssuers =>
+       case _ => // failure
+     }
+   
+     (mollieClient ? ListPaymentMethods()) {
+       case resp: PaymentMethods =>
+       case _ => // failure
+     }
  ```
