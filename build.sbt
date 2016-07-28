@@ -1,6 +1,6 @@
-name := """scala-postnl"""
+name := """scala-mollie"""
 
-version := "0.4"
+version := "0.1"
 
 organization := "com.github.benniekrijger"
 
