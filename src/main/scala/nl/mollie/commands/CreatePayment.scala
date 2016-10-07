@@ -1,14 +1,12 @@
 package nl.mollie.commands
 
-import nl.mollie.models.PaymentLocale
-
 sealed trait CreatePayment {
   val amount: Double
   val description: String
   val redirectUrl: String
   val webhookUrl: Option[String]
   val method: String
-  val locale: Option[PaymentLocale.Value]
+  val locale: Option[String]
   val metadata: Map[String, String]
 }
 
@@ -18,7 +16,7 @@ case class CreatePaymentIdeal(
     description: String,
     redirectUrl: String,
     webhookUrl: Option[String],
-    locale: Option[PaymentLocale.Value],
+    locale: Option[String],
     metadata: Map[String, String] = Map.empty
 ) extends CreatePayment {
   val method: String = "ideal"
@@ -39,7 +37,7 @@ case class CreatePaymentCreditcard(
     description: String,
     redirectUrl: String,
     webhookUrl: Option[String],
-    locale: Option[PaymentLocale.Value],
+    locale: Option[String],
     metadata: Map[String, String] = Map.empty
 ) extends CreatePayment {
   val method: String = "creditcard"
@@ -50,7 +48,7 @@ case class CreatePaymentMistercash(
     description: String,
     redirectUrl: String,
     webhookUrl: Option[String],
-    locale: Option[PaymentLocale.Value],
+    locale: Option[String],
     metadata: Map[String, String] = Map.empty
 ) extends CreatePayment {
   val method: String = "mistercash"
@@ -61,7 +59,7 @@ case class CreatePaymentSofort(
     description: String,
     redirectUrl: String,
     webhookUrl: Option[String],
-    locale: Option[PaymentLocale.Value],
+    locale: Option[String],
     metadata: Map[String, String] = Map.empty
 ) extends CreatePayment {
   val method: String = "sofort"
@@ -74,7 +72,7 @@ case class CreatePaymentBanktransfer(
     description: String,
     redirectUrl: String,
     webhookUrl: Option[String],
-    locale: Option[PaymentLocale.Value],
+    locale: Option[String],
     metadata: Map[String, String] = Map.empty
 ) extends CreatePayment {
   val method: String = "banktransfer"
@@ -87,7 +85,7 @@ case class CreatePaymentDirectDebit(
     description: String,
     redirectUrl: String,
     webhookUrl: Option[String],
-    locale: Option[PaymentLocale.Value],
+    locale: Option[String],
     metadata: Map[String, String] = Map.empty
 ) extends CreatePayment {
   val method: String = "directdebit"
@@ -98,7 +96,7 @@ case class CreatePaymentBelfius(
     description: String,
     redirectUrl: String,
     webhookUrl: Option[String],
-    locale: Option[PaymentLocale.Value],
+    locale: Option[String],
     metadata: Map[String, String] = Map.empty
 ) extends CreatePayment {
   val method: String = "belfius"
@@ -114,7 +112,7 @@ case class CreatePaymentPaypal(
     description: String,
     redirectUrl: String,
     webhookUrl: Option[String],
-    locale: Option[PaymentLocale.Value],
+    locale: Option[String],
     metadata: Map[String, String] = Map.empty
 ) extends CreatePayment {
   val method: String = "paypal"
@@ -125,7 +123,7 @@ case class CreatePaymentBitcoin(
     description: String,
     redirectUrl: String,
     webhookUrl: Option[String],
-    locale: Option[PaymentLocale.Value],
+    locale: Option[String],
     metadata: Map[String, String] = Map.empty
 ) extends CreatePayment {
   val method: String = "bitcoin"
@@ -136,7 +134,7 @@ case class CreatePaymentPodiumcadeaukaart(
     description: String,
     redirectUrl: String,
     webhookUrl: Option[String],
-    locale: Option[PaymentLocale.Value],
+    locale: Option[String],
     metadata: Map[String, String] = Map.empty
 ) extends CreatePayment {
   val method: String = "podiumcadeaukaart"
@@ -148,7 +146,7 @@ case class CreatePaymentPaysafeCard(
     description: String,
     redirectUrl: String,
     webhookUrl: Option[String],
-    locale: Option[PaymentLocale.Value],
+    locale: Option[String],
     metadata: Map[String, String] = Map.empty
 ) extends CreatePayment {
   val method: String = "paysafecard"

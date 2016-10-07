@@ -11,7 +11,6 @@ import de.heikoseeberger.akkahttpjson4s.Json4sSupport
 import nl.mollie.commands.CreatePaymentIdeal
 import nl.mollie.config.MollieConfig
 import nl.mollie.connection.HttpServer
-import nl.mollie.models.PaymentLocale
 import nl.mollie.responses.PaymentResponse
 import org.json4s.native.JsonMethods._
 import org.json4s.{DefaultFormats, Formats, Serialization, jackson, _}
@@ -50,13 +49,16 @@ class MollieCommandActorSpec(_system: ActorSystem) extends TestKit(_system) with
               val expectedBody =
                 """
                   |{
-                  | "issuer":"ideal_TESTNL99",
-                  | "amount":10.0,
-                  | "description":"",
-                  | "redirectUrl":"http://redirect",
-                  | "webhookUrl":"http://webhook",
-                  | "locale":{"name":"nl"},
-                  | "metadata":{"id":"some id"}}
+                  |   "issuer": "ideal_TESTNL99",
+                  |   "amount": 10.0,
+                  |   "description": "",
+                  |   "redirectUrl": "http://redirect",
+                  |   "webhookUrl": "http://webhook",
+                  |   "locale": "nl",
+                  |   "metadata":{
+                  |     "id":"some id"
+                  |   }
+                  |}
                 """.stripMargin.replaceAll("""\s+""", "")
 
               body.stripMargin.replaceAll("""\s+""", "") == expectedBody match {
@@ -116,8 +118,10 @@ class MollieCommandActorSpec(_system: ActorSystem) extends TestKit(_system) with
         issuer = Some("ideal_TESTNL99"),
         redirectUrl = "http://redirect",
         webhookUrl = Some("http://webhook"),
-        locale = Some(PaymentLocale.nl),
-        metadata = Map("id" -> "some id")
+        locale = Some("nl"),
+        metadata = Map(
+          "id" -> "some id"
+        )
       )
 
       expectMsgPF(timeoutDuration) {
