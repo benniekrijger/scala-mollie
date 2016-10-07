@@ -46,4 +46,14 @@ Sample usage
        case resp: PaymentMethods =>
        case _ => // failure
      }
+     
+     (mollieClient ? CreatePaymentIdeal(
+        issuer = "ideal_RABONL",
+        amount = 10.5,
+        description = "Test payment",
+        redirectUrl = "http://example.nl/return-url.html",
+        webhookUrl = Some("http://example.nl/webhook.html"),
+        locale = Some("nl"),
+        metadata = Map("orderId" -> "1234")
+     ))
  ```
