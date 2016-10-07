@@ -55,5 +55,8 @@ Sample usage
         webhookUrl = Some("http://example.nl/webhook.html"),
         locale = Some("nl"),
         metadata = Map("orderId" -> "1234")
-     ))
+     )) {
+       case resp: PaymentResponse =>
+       case _ => // failure
+     }
  ```
