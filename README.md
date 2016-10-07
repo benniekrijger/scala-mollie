@@ -8,10 +8,10 @@ Dependencies
 ------------
 To include the latest release of the Mollie client into your `sbt` project, add the following lines to your `build.sbt` file:
 ```scala
-   libraryDependencies += "com.github.benniekrijger" %% "scala-mollie" % "0.4"
+   libraryDependencies += "com.github.benniekrijger" %% "scala-mollie" % "0.6"
 ```
 
-This version of `scala-mollie` depends on Akka 2.4.10 and Scala 2.11.8. 
+This version of `scala-mollie` depends on Akka 2.4.11 and Scala 2.11.8. 
 
 
 Sample usage
