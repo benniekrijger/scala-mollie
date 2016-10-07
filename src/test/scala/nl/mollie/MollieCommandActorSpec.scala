@@ -5,11 +5,10 @@ import java.util.concurrent.TimeUnit
 import akka.actor.ActorSystem
 import akka.http.scaladsl.marshalling.Marshal
 import akka.http.scaladsl.model.{StatusCodes, _}
-import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.ActorMaterializer
 import akka.testkit.{ImplicitSender, TestKit}
 import de.heikoseeberger.akkahttpjson4s.Json4sSupport
-import nl.mollie.commands.CreatePaymentBanktransfer
+import nl.mollie.commands.CreatePaymentIdeal
 import nl.mollie.config.MollieConfig
 import nl.mollie.connection.HttpServer
 import nl.mollie.models.PaymentLocale
@@ -31,51 +30,74 @@ class MollieCommandActorSpec(_system: ActorSystem) extends TestKit(_system) with
 
   def this() = this(ActorSystem("MollieCommandActorSpec"))
 
-  override def afterAll {
+  override def afterAll() {
     TestKit.shutdownActorSystem(system)
   }
 
   val config: MollieConfig = mollieConfig()
+  val log = _system.log
 
   "A MollieCommandActor" must {
 
     "be able to create an ideal payment" in {
       val testConnection: HttpServer = new HttpServer {
         override def sendRequest(request: HttpRequest): Future[HttpResponse] = {
-          Unmarshal(request.entity)
-            .to[JValue]
-            .flatMap { requestJson =>
-              val responseJson = parse(
+          request.entity
+            .toStrict(timeoutDuration)
+            .map(_.data)
+            .map(_.utf8String)
+            .flatMap { body =>
+              val expectedBody =
                 """
-                  {
-                    "id":              "tr_7UhSN1zuXS",
-                    "mode":            "test",
-                    "createdDatetime": "2016-07-28T17:11:13.0Z",
-                    "status":          "open",
-                    "expiryPeriod":    "PT15M",
-                    "amount":          10.00,
-                    "description":     "My first payment",
-                    "metadata": {
-                        "order_id": "12345"
-                    },
-                    "locale": "nl",
-                    "profileId": "pfl_QkEhN94Ba",
-                    "links": {
-                        "paymentUrl":  "https://www.mollie.com/payscreen/select-method/7UhSN1zuXS",
-                        "redirectUrl": "https://webshop.example.org/order/12345/"
-                    }
-                  }
-                """
-              )
+                  |{
+                  | "issuer":"ideal_TESTNL99",
+                  | "amount":10.0,
+                  | "description":"",
+                  | "redirectUrl":"http://redirect",
+                  | "webhookUrl":"http://webhook",
+                  | "locale":{"name":"nl"},
+                  | "metadata":{"id":"some id"}}
+                """.stripMargin.replaceAll("""\s+""", "")
 
-              Marshal(responseJson)
-                .to[MessageEntity]
-                .map { entity =>
-                  HttpResponse(
-                    status = StatusCodes.Created,
-                    entity = entity
+              body.stripMargin.replaceAll("""\s+""", "") == expectedBody match {
+                case true =>
+                  val responseJson = parse(
+                    """
+                      {
+                        "id":              "tr_7UhSN1zuXS",
+                        "mode":            "test",
+                        "createdDatetime": "2016-07-28T17:11:13.0Z",
+                        "status":          "open",
+                        "expiryPeriod":    "PT15M",
+                        "amount":          10.00,
+                        "description":     "My first payment",
+                        "metadata": {
+                            "order_id": "12345"
+                        },
+                        "locale": "nl",
+                        "profileId": "pfl_QkEhN94Ba",
+                        "links": {
+                            "paymentUrl":  "https://www.mollie.com/payscreen/select-method/7UhSN1zuXS",
+                            "redirectUrl": "https://webshop.example.org/order/12345/"
+                        }
+                      }
+                    """
                   )
-                }
+
+                  Marshal(responseJson)
+                    .to[MessageEntity]
+                    .map { entity =>
+                      HttpResponse(
+                        status = StatusCodes.Created,
+                        entity = entity
+                      )
+                    }
+                case _ =>
+                  log.warning("body={} != expected={}", body, expectedBody)
+                  Future.successful(
+                    HttpResponse(status = StatusCodes.BadRequest)
+                  )
+              }
             }
           }
       }
@@ -88,11 +110,12 @@ class MollieCommandActorSpec(_system: ActorSystem) extends TestKit(_system) with
       )
 
 
-      commandActor ! CreatePaymentBanktransfer(
+      commandActor ! CreatePaymentIdeal(
         amount = 10,
         description = "",
+        issuer = Some("ideal_TESTNL99"),
         redirectUrl = "http://redirect",
-        webhookUrl = None,
+        webhookUrl = Some("http://webhook"),
         locale = Some(PaymentLocale.nl),
         metadata = Map("id" -> "some id")
       )
