@@ -57,7 +57,8 @@ class MollieCommandActorSpec(_system: ActorSystem) extends TestKit(_system) with
                   |   "locale": "nl",
                   |   "metadata":{
                   |     "id":"some id"
-                  |   }
+                  |   },
+                  |   "method": "ideal"
                   |}
                 """.stripMargin.replaceAll("""\s+""", "")
 

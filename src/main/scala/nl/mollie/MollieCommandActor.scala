@@ -10,7 +10,7 @@ import nl.mollie.commands.CreatePayment
 import nl.mollie.config.MollieConfig
 import nl.mollie.connection.HttpServer
 import nl.mollie.responses.{MollieFailure, PaymentResponse}
-import org.json4s.{DefaultFormats, Formats, Serialization, jackson}
+import org.json4s.{DefaultFormats, FieldSerializer, Formats, Serialization, jackson}
 
 class MollieCommandActor(
     connection: HttpServer,
@@ -19,7 +19,7 @@ class MollieCommandActor(
   import context.dispatcher
   implicit val system = context.system
   implicit val materializer = ActorMaterializer()
-  implicit val formats: Formats = DefaultFormats
+  implicit val formats: Formats = DefaultFormats + FieldSerializer[CreatePayment]()
   implicit val jacksonSerialization: Serialization = jackson.Serialization
 
   log.info("Mollie command client started")
