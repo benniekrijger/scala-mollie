@@ -2,6 +2,12 @@ language: scala
 
 scala:
   - 2.11.8
+  - 2.12.0
 
 jdk:
   - oraclejdk8
+
+sbt_args: -J-XX:ReservedCodeCacheSize=128m
+cache:
+  directories:
+    - $HOME/.ivy2/cache

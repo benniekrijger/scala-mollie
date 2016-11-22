@@ -1,9 +1,11 @@
 name := """scala-mollie"""
 
-version := "0.9"
+version := "0.10"
 
 organization := "com.github.benniekrijger"
 
-scalaVersion := "2.11.8"
+crossScalaVersions := Seq("2.11.8", "2.12.0")
+scalaVersion := "2.12.0"
+crossVersion := CrossVersion.binary
 
 libraryDependencies ++= Dependencies.common
