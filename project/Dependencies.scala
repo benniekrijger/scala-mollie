@@ -3,7 +3,7 @@ import sbt._
 object  Dependencies {
   object Version {
     val akka = "2.4.14"
-    val akkaHttp = "10.0.0-RC2"
+    val akkaHttp = "10.0.0"
   }
 
   val common = Seq(
@@ -11,7 +11,7 @@ object  Dependencies {
     "com.typesafe.akka" %% "akka-testkit" % Version.akka % "test",
     "com.typesafe.akka" %% "akka-slf4j" % Version.akka,
     "com.typesafe.akka" %% "akka-http" % Version.akkaHttp,
-    "de.heikoseeberger" %% "akka-http-json4s" % "1.11.0-M4",
+    "de.heikoseeberger" %% "akka-http-json4s" % "1.11.0",
     "org.json4s"        %% "json4s-native" % "3.5.0",
     "org.json4s"        %% "json4s-jackson" % "3.5.0",
     "joda-time"         %  "joda-time" % "2.9.4",
