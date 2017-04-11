@@ -1,6 +1,6 @@
 package nl.mollie
 
-import akka.actor.{Actor, ActorLogging, Props}
+import akka.actor.{Actor, ActorLogging, ActorSystem, Props}
 import akka.http.scaladsl.marshalling.Marshal
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.unmarshalling.Unmarshal
@@ -12,12 +12,14 @@ import nl.mollie.connection.HttpServer
 import nl.mollie.responses.{MollieFailure, PaymentResponse}
 import org.json4s.{DefaultFormats, FieldSerializer, Formats, Serialization, jackson}
 
+import scala.util.Success
+
 class MollieCommandActor(
     connection: HttpServer,
     config: MollieConfig
 ) extends Actor with ActorLogging with Json4sSupport {
   import context.dispatcher
-  implicit val system = context.system
+  implicit val system: ActorSystem = context.system
   implicit val materializer = ActorMaterializer()
   implicit val formats: Formats = DefaultFormats + FieldSerializer[CreatePayment]()
   implicit val jacksonSerialization: Serialization = jackson.Serialization
@@ -28,17 +30,16 @@ class MollieCommandActor(
     case cmd: CreatePayment =>
       val cmdSender = sender()
 
-      for {
-        requestEntity <- Marshal(cmd).to[RequestEntity]
-        response <- connection.sendRequest(
+      Marshal(cmd).to[RequestEntity].flatMap { requestEntity =>
+        connection.sendRequest(
           request = HttpRequest(
             uri = s"/${config.apiBasePath}/payments",
             method = HttpMethods.POST,
             entity = requestEntity
           )
         )
-      } yield response match {
-        case resp @ HttpResponse(StatusCodes.Created, headers, entity, _) =>
+      }.onComplete {
+        case Success(resp @ HttpResponse(StatusCodes.Created, headers, entity, _)) =>
           Unmarshal(entity).to[PaymentResponse]
             .recover {
               case e: Throwable =>
@@ -46,8 +47,8 @@ class MollieCommandActor(
                 MollieFailure(s"Failed to create payment: $cmd")
             }
             .map(cmdSender ! _)
-        case resp @ HttpResponse(code, _, _, _) =>
-          log.error(s"Response: $resp, failed to create payment: $cmd")
+        case msg =>
+          log.error("Response: {}, failed to create payment: {}", msg, cmd)
           cmdSender ! MollieFailure(s"Failed to create payment: $cmd")
       }
   }

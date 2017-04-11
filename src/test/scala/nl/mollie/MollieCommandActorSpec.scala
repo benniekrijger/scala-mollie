@@ -3,6 +3,7 @@ package nl.mollie
 import java.util.concurrent.TimeUnit
 
 import akka.actor.ActorSystem
+import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.Marshal
 import akka.http.scaladsl.model.{StatusCodes, _}
 import akka.stream.ActorMaterializer
@@ -11,18 +12,18 @@ import de.heikoseeberger.akkahttpjson4s.Json4sSupport
 import nl.mollie.commands.CreatePaymentIdeal
 import nl.mollie.config.MollieConfig
 import nl.mollie.connection.HttpServer
-import nl.mollie.responses.PaymentResponse
+import nl.mollie.responses.{MollieFailure, PaymentResponse}
 import org.json4s.native.JsonMethods._
 import org.json4s.{DefaultFormats, Formats, Serialization, jackson, _}
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.concurrent.duration.FiniteDuration
 
 class MollieCommandActorSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSender
   with WordSpecLike with Matchers with BeforeAndAfterAll with Json4sSupport with MollieFactory {
   implicit val formats: Formats = DefaultFormats
-  implicit val dispatcher = system.dispatcher
+  implicit val dispatcher: ExecutionContextExecutor = system.dispatcher
   implicit val jacksonSerialization: Serialization = jackson.Serialization
   implicit val materializer = ActorMaterializer()
   val timeoutDuration = FiniteDuration(3, TimeUnit.SECONDS)
@@ -34,7 +35,7 @@ class MollieCommandActorSpec(_system: ActorSystem) extends TestKit(_system) with
   }
 
   val config: MollieConfig = mollieConfig()
-  val log = _system.log
+  val log: LoggingAdapter = _system.log
 
   "A MollieCommandActor" must {
 
@@ -62,10 +63,9 @@ class MollieCommandActorSpec(_system: ActorSystem) extends TestKit(_system) with
                   |}
                 """.stripMargin.replaceAll("""\s+""", "")
 
-              body.stripMargin.replaceAll("""\s+""", "") == expectedBody match {
-                case true =>
-                  val responseJson = parse(
-                    """
+              if (body.stripMargin.replaceAll("""\s+""", "") == expectedBody) {
+                val responseJson = parse(
+                  """
                       {
                         "id":              "tr_7UhSN1zuXS",
                         "mode":            "test",
@@ -85,21 +85,21 @@ class MollieCommandActorSpec(_system: ActorSystem) extends TestKit(_system) with
                         }
                       }
                     """
-                  )
+                )
 
-                  Marshal(responseJson)
-                    .to[MessageEntity]
-                    .map { entity =>
-                      HttpResponse(
-                        status = StatusCodes.Created,
-                        entity = entity
-                      )
-                    }
-                case _ =>
-                  log.warning("body={} != expected={}", body, expectedBody)
-                  Future.successful(
-                    HttpResponse(status = StatusCodes.BadRequest)
-                  )
+                Marshal(responseJson)
+                  .to[MessageEntity]
+                  .map { entity =>
+                    HttpResponse(
+                      status = StatusCodes.Created,
+                      entity = entity
+                    )
+                  }
+              } else {
+                log.warning("body={} != expected={}", body, expectedBody)
+                Future.successful(
+                  HttpResponse(status = StatusCodes.BadRequest)
+                )
               }
             }
           }
@@ -126,7 +126,37 @@ class MollieCommandActorSpec(_system: ActorSystem) extends TestKit(_system) with
       )
 
       expectMsgPF(timeoutDuration) {
-        case resp: PaymentResponse => true
+        case _: PaymentResponse => true
+      }
+    }
+
+    "respond failure when unable to create ideal payment" in {
+      val testConnection: HttpServer = new HttpServer {
+        override def sendRequest(request: HttpRequest): Future[HttpResponse] = Future.failed(new RuntimeException("Timeout"))
+      }
+
+      val commandActor = system.actorOf(
+        MollieCommandActor.props(
+          connection = testConnection,
+          config = config
+        )
+      )
+
+
+      commandActor ! CreatePaymentIdeal(
+        amount = 10,
+        description = "",
+        issuer = Some("ideal_TESTNL99"),
+        redirectUrl = "http://redirect",
+        webhookUrl = Some("http://webhook"),
+        locale = Some("nl"),
+        metadata = Map(
+          "id" -> "some id"
+        )
+      )
+
+      expectMsgPF(timeoutDuration) {
+        case _: MollieFailure => true
       }
     }
   }

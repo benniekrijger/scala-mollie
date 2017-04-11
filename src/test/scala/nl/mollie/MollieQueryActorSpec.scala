@@ -11,18 +11,18 @@ import de.heikoseeberger.akkahttpjson4s.Json4sSupport
 import nl.mollie.config.MollieConfig
 import nl.mollie.connection.HttpServer
 import nl.mollie.queries.{GetPayment, ListPaymentIssuers, ListPaymentMethods}
-import nl.mollie.responses.{PaymentIssuers, PaymentMethods, PaymentResponse}
+import nl.mollie.responses.{MollieFailure, PaymentIssuers, PaymentMethods, PaymentResponse}
 import org.json4s.native.JsonMethods._
 import org.json4s.{DefaultFormats, Formats, Serialization, jackson}
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.concurrent.duration.FiniteDuration
 
 class MollieQueryActorSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSender
   with WordSpecLike with Matchers with BeforeAndAfterAll with Json4sSupport with MollieFactory {
   implicit val formats: Formats = DefaultFormats
-  implicit val dispatcher = system.dispatcher
+  implicit val dispatcher: ExecutionContextExecutor = system.dispatcher
   implicit val jacksonSerialization: Serialization = jackson.Serialization
   implicit val materializer = ActorMaterializer()
   val timeoutDuration = FiniteDuration(3, TimeUnit.SECONDS)
@@ -94,6 +94,25 @@ class MollieQueryActorSpec(_system: ActorSystem) extends TestKit(_system) with I
       }
     }
 
+    "return failure response on client exception when finding a payment" in {
+      val testConnection = new HttpServer {
+        override def sendRequest(request: HttpRequest): Future[HttpResponse] = Future.failed(new RuntimeException("Timeout"))
+      }
+
+      val queryActor = system.actorOf(
+        MollieQueryActor.props(
+          connection = testConnection,
+          config = config
+        )
+      )
+
+      queryActor ! GetPayment(id = "paymentId")
+
+      expectMsgPF(timeoutDuration) {
+        case _: MollieFailure =>
+      }
+    }
+
     "be able to list payments" in {
       val testConnection: HttpServer = new HttpServer {
         override def sendRequest(request: HttpRequest): Future[HttpResponse] = {
@@ -158,6 +177,25 @@ class MollieQueryActorSpec(_system: ActorSystem) extends TestKit(_system) with I
       }
     }
 
+    "return failure response on client exception when listing payments" in {
+      val testConnection = new HttpServer {
+        override def sendRequest(request: HttpRequest): Future[HttpResponse] = Future.failed(new RuntimeException("Timeout"))
+      }
+
+      val queryActor = system.actorOf(
+        MollieQueryActor.props(
+          connection = testConnection,
+          config = config
+        )
+      )
+
+      queryActor ! ListPaymentMethods()
+
+      expectMsgPF(timeoutDuration) {
+        case _: MollieFailure =>
+      }
+    }
+
     "be able to list issuers" in {
       val testConnection: HttpServer = new HttpServer {
         override def sendRequest(request: HttpRequest): Future[HttpResponse] = {
@@ -213,6 +251,25 @@ class MollieQueryActorSpec(_system: ActorSystem) extends TestKit(_system) with I
 
       expectMsgPF(timeoutDuration) {
         case resp: PaymentIssuers if resp.data.size == 3 =>
+      }
+    }
+
+    "return failure response on client exception when listing issuers" in {
+      val testConnection = new HttpServer {
+        override def sendRequest(request: HttpRequest): Future[HttpResponse] = Future.failed(new RuntimeException("Timeout"))
+      }
+
+      val queryActor = system.actorOf(
+        MollieQueryActor.props(
+          connection = testConnection,
+          config = config
+        )
+      )
+
+      queryActor ! ListPaymentIssuers()
+
+      expectMsgPF(timeoutDuration) {
+        case _: MollieFailure =>
       }
     }
   }
