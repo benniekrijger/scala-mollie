@@ -5,19 +5,18 @@ import akka.http.scaladsl.marshalling.Marshal
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.ActorMaterializer
-import de.heikoseeberger.akkahttpjson4s.Json4sSupport
 import nl.mollie.commands.CreatePayment
 import nl.mollie.config.MollieConfig
 import nl.mollie.connection.HttpServer
 import nl.mollie.responses.{MollieFailure, PaymentResponse}
 import org.json4s.{DefaultFormats, FieldSerializer, Formats, Serialization, jackson}
-
+import de.heikoseeberger.akkahttpjson4s.Json4sSupport._
 import scala.util.Success
 
 class MollieCommandActor(
     connection: HttpServer,
     config: MollieConfig
-) extends Actor with ActorLogging with Json4sSupport {
+) extends Actor with ActorLogging {
   import context.dispatcher
   implicit val system: ActorSystem = context.system
   implicit val materializer = ActorMaterializer()

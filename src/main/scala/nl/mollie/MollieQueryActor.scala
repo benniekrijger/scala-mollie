@@ -4,7 +4,7 @@ import akka.actor.{Actor, ActorLogging, ActorSystem, Props}
 import akka.http.scaladsl.model.{HttpMethods, HttpRequest, HttpResponse, StatusCodes}
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.ActorMaterializer
-import de.heikoseeberger.akkahttpjson4s.Json4sSupport
+import de.heikoseeberger.akkahttpjson4s.Json4sSupport._
 import nl.mollie.config.MollieConfig
 import nl.mollie.connection.HttpServer
 import nl.mollie.queries.{GetPayment, ListPaymentIssuers, ListPaymentMethods}
@@ -16,7 +16,7 @@ import scala.util.Success
 class MollieQueryActor(
     connection: HttpServer,
     config: MollieConfig
-) extends Actor with ActorLogging with Json4sSupport {
+) extends Actor with ActorLogging {
   import context.dispatcher
   implicit val system: ActorSystem = context.system
   implicit val materializer = ActorMaterializer()
