@@ -1,6 +1,6 @@
 name := """scala-mollie"""
 
-version := "0.14"
+version := "0.15"
 
 organization := "com.github.benniekrijger"
 
