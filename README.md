@@ -8,7 +8,7 @@ Dependencies
 ------------
 To include the latest release of the Mollie client into your `sbt` project, add the following lines to your `build.sbt` file:
 ```scala
-   libraryDependencies += "com.github.benniekrijger" %% "scala-mollie" % "0.14"
+   libraryDependencies += "com.github.benniekrijger" %% "scala-mollie" % "0.15"
 ```
 
 This version of `scala-mollie` depends on Akka 2.4.14 and Scala 2.12.0. 
@@ -32,17 +32,17 @@ Sample usage
        MollieClientActor.name
      )
    
-     (mollieClient ? GetPayment("some-payment-id")) {
+     (mollieClient ? GetPayment("some-payment-id")).map {
        case resp: PaymentResponse =>
        case _ => // failure
      }
    
-     (mollieClient ? ListPaymentIssuers()) {
+     (mollieClient ? ListPaymentIssuers()).map {
        case resp: PaymentIssuers =>
        case _ => // failure
      }
    
-     (mollieClient ? ListPaymentMethods()) {
+     (mollieClient ? ListPaymentMethods()).map {
        case resp: PaymentMethods =>
        case _ => // failure
      }
@@ -55,7 +55,7 @@ Sample usage
         webhookUrl = Some("http://example.nl/webhook.html"),
         locale = Some("nl"),
         metadata = Map("orderId" -> "1234")
-     )) {
+     )).map {
        case resp: PaymentResponse =>
        case _ => // failure
      }
