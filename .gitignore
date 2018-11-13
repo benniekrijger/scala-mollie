@@ -1,6 +1,18 @@
-/RUNNING_PID
-/logs/
-/project/*-shim.sbt
-/project/project/
-/project/target/
-/target/
+.DS_Store
+target
+project/boot
+*.swp
+.idea
+.idea_modules
+*.log
+# sbt specific
+.cache
+.lib/
+dist/*
+lib_managed/
+src_managed/
+project/boot/
+project/plugins/project/
+# Scala-IDE specific
+.scala_dependencies
+.worksheet

@@ -1,11 +1,10 @@
 language: scala
 
 scala:
-  - 2.11.8
-  - 2.12.0
+  - 2.12.7
 
 jdk:
-  - oraclejdk8
+  - openjdk8
 
 sbt_args: -J-XX:ReservedCodeCacheSize=128m
 cache:

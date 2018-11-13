@@ -1,6 +1,6 @@
 package nl.mollie.models
 
 object PaymentMode extends Enumeration {
-  val test = Value("test")
-  val live = Value("live")
+  val test: Value = Value("test")
+  val live: Value = Value("live")
 }

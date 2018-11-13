@@ -1,11 +1,18 @@
 name := """scala-mollie"""
 
-version := "0.15"
+version := "0.18"
 
 organization := "com.github.benniekrijger"
 
-crossScalaVersions := Seq("2.11.8", "2.12.1")
-scalaVersion := crossScalaVersions.value.head
-crossVersion := CrossVersion.binary
+scalaVersion := "2.12.7"
+
+publishTo := Some(
+  if (isSnapshot.value)
+    Opts.resolver.sonatypeSnapshots
+  else
+    Opts.resolver.sonatypeStaging
+)
+
+cancelable in Global := true
 
 libraryDependencies ++= Dependencies.common
