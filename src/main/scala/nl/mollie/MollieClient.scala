@@ -2,6 +2,7 @@ package nl.mollie
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model.{HttpHeader, Uri, headers}
+import akka.stream.Materializer
 import com.sun.media.sound.InvalidDataException
 import de.heikoseeberger.akkahttpjson4s.Json4sSupport
 import nl.mollie.commands.CreatePayment
@@ -22,10 +23,10 @@ trait MollieClient {
 }
 
 object MollieClient {
-  def apply(config: MollieConfig, httpClient: HttpClient)(implicit system: ActorSystem, ec: ExecutionContext): MollieClient = {
+  def apply(config: MollieConfig)(implicit system: ActorSystem, materializer: Materializer, ec: ExecutionContext): MollieClient = {
     new MollieClientImpl(
       config = config,
-      httpClient = httpClient
+      httpClient = new HttpClientImpl()
     )
   }
 }
