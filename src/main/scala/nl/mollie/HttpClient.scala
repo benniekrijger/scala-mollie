@@ -70,7 +70,7 @@ private[mollie] class HttpClientImpl()(implicit system: ActorSystem, materialize
 
   private def handleResponse[B](request: HttpRequest, response: HttpResponse)(implicit mB: FromEntityUnmarshaller[B]): Future[Either[RequestFailure, B]] = {
     response match {
-      case HttpResponse(StatusCodes.OK, _, entity, _) =>
+      case HttpResponse(code, _, entity, _) if HttpClientImpl.validResponseCodes.contains(code) =>
         Unmarshal(entity).to[B].map(Right(_)).recover {
           case t: Throwable =>
             entity.discardBytes()
@@ -84,4 +84,8 @@ private[mollie] class HttpClientImpl()(implicit system: ActorSystem, materialize
         FastFuture.successful(Left(RequestFailure("request failed")))
     }
   }
+}
+
+object HttpClientImpl {
+  private val validResponseCodes: Set[StatusCode] = Set(StatusCodes.OK, StatusCodes.Created, StatusCodes.Accepted)
 }
