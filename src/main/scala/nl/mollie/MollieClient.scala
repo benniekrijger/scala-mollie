@@ -3,7 +3,6 @@ package nl.mollie
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model.{HttpHeader, Uri, headers}
 import akka.stream.Materializer
-import com.sun.media.sound.InvalidDataException
 import de.heikoseeberger.akkahttpjson4s.Json4sSupport
 import nl.mollie.commands.CreatePayment
 import nl.mollie.config.MollieConfig
@@ -40,13 +39,7 @@ final class MollieClientImpl(
   }
   private implicit val baseSerialization: Serialization.type = jackson.Serialization
 
-  private val authorizationHeader: HttpHeader = headers.Authorization(
-    headers.OAuth2BearerToken(token = config.testMode match {
-      case false if config.apiKey.isDefined => config.apiKey.get
-      case false => throw new InvalidDataException("Mollie ApiKey not defined")
-      case true => config.testApiKey
-    })
-  )
+  private val authorizationHeader: HttpHeader = headers.Authorization(headers.OAuth2BearerToken(token = config.apiKey))
 
   def createPayment(cmd: CreatePayment): Future[Either[RequestFailure, PaymentResponse]] = {
     val uri = Uri(config.apiHost)
