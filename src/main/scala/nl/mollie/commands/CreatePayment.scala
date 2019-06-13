@@ -1,11 +1,11 @@
 package nl.mollie.commands
 
-sealed trait CreatePayment {
+trait CreatePayment {
   val amount: Double
   val description: String
   val redirectUrl: String
   val webhookUrl: Option[String]
-  val method: String
+  val method: Option[String]
   val locale: Option[String]
   val metadata: Map[String, String]
 }
@@ -19,7 +19,7 @@ case class CreatePaymentIdeal(
     locale: Option[String],
     metadata: Map[String, String] = Map.empty
 ) extends CreatePayment {
-  val method: String = "ideal"
+  val method: Option[String] = Some("ideal")
 }
 
 case class CreatePaymentCreditcard(
@@ -40,7 +40,7 @@ case class CreatePaymentCreditcard(
     locale: Option[String],
     metadata: Map[String, String] = Map.empty
 ) extends CreatePayment {
-  val method: String = "creditcard"
+  val method: Option[String] = Some("creditcard")
 }
 
 case class CreatePaymentMistercash(
@@ -51,7 +51,7 @@ case class CreatePaymentMistercash(
     locale: Option[String],
     metadata: Map[String, String] = Map.empty
 ) extends CreatePayment {
-  val method: String = "mistercash"
+  val method: Option[String] = Some("mistercash")
 }
 
 case class CreatePaymentSofort(
@@ -62,7 +62,7 @@ case class CreatePaymentSofort(
     locale: Option[String],
     metadata: Map[String, String] = Map.empty
 ) extends CreatePayment {
-  val method: String = "sofort"
+  val method: Option[String] = Some("sofort")
 }
 
 case class CreatePaymentBanktransfer(
@@ -75,7 +75,7 @@ case class CreatePaymentBanktransfer(
     locale: Option[String],
     metadata: Map[String, String] = Map.empty
 ) extends CreatePayment {
-  val method: String = "banktransfer"
+  val method: Option[String] = Some("banktransfer")
 }
 
 case class CreatePaymentDirectDebit(
@@ -88,7 +88,7 @@ case class CreatePaymentDirectDebit(
     locale: Option[String],
     metadata: Map[String, String] = Map.empty
 ) extends CreatePayment {
-  val method: String = "directdebit"
+  val method: Option[String] = Some("directdebit")
 }
 
 case class CreatePaymentBelfius(
@@ -99,7 +99,7 @@ case class CreatePaymentBelfius(
     locale: Option[String],
     metadata: Map[String, String] = Map.empty
 ) extends CreatePayment {
-  val method: String = "belfius"
+  val method: Option[String] = Some("belfius")
 }
 
 case class CreatePaymentPaypal(
@@ -115,7 +115,7 @@ case class CreatePaymentPaypal(
     locale: Option[String],
     metadata: Map[String, String] = Map.empty
 ) extends CreatePayment {
-  val method: String = "paypal"
+  val method: Option[String] = Some("paypal")
 }
 
 case class CreatePaymentBitcoin(
@@ -126,7 +126,7 @@ case class CreatePaymentBitcoin(
     locale: Option[String],
     metadata: Map[String, String] = Map.empty
 ) extends CreatePayment {
-  val method: String = "bitcoin"
+  val method: Option[String] = Some("bitcoin")
 }
 
 case class CreatePaymentPodiumcadeaukaart(
@@ -137,7 +137,7 @@ case class CreatePaymentPodiumcadeaukaart(
     locale: Option[String],
     metadata: Map[String, String] = Map.empty
 ) extends CreatePayment {
-  val method: String = "podiumcadeaukaart"
+  val method: Option[String] = Some("podiumcadeaukaart")
 }
 
 case class CreatePaymentPaysafeCard(
@@ -149,5 +149,5 @@ case class CreatePaymentPaysafeCard(
     locale: Option[String],
     metadata: Map[String, String] = Map.empty
 ) extends CreatePayment {
-  val method: String = "paysafecard"
+  val method: Option[String] = Some("paysafecard")
 }
