@@ -1,10 +1,10 @@
 name := """scala-mollie"""
 
-version := "0.23"
+version := "0.24"
 
 organization := "com.github.benniekrijger"
 
-scalaVersion := "2.12.8"
+scalaVersion := "2.13.0"
 
 publishTo := Some(
   if (isSnapshot.value)
