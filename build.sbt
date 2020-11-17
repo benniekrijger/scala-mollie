@@ -6,6 +6,8 @@ organization := "com.github.benniekrijger"
 
 scalaVersion := "2.13.3"
 
+publishConfiguration := publishConfiguration.value.withOverwrite(true)
+
 publishTo := Some(
   if (isSnapshot.value)
     Opts.resolver.sonatypeSnapshots
